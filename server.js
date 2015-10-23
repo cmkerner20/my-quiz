@@ -13,6 +13,11 @@ app.get('/quiz', function (req, res) {
 
 });
 
+app.post('/quiz', function(req, res) {
+  //console.log(req.body.objectData);
+  res.contentType('json');
+  res.send({ some: JSON.stringify({response:'json'}) });
+});
 
 
 /*var server = app.listen(3000, function () {

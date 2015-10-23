@@ -7,7 +7,7 @@ Notes: Pie chart adapted from http://wickedlysmart.com/how-to-make-a-pie-chart-w
 */
 
 
-
+var xhr = new XMLHttpRequest(); 
 var content = document.getElementById('content');
 var buttons = document.getElementById('buttons');
 var i =0;
@@ -18,6 +18,15 @@ var nameString;
 var checkedVal = {};
 var colors = ["Green", "Red"];
 var lastCalled = false;
+
+xhr.onload = function(){
+	if(xhr.status===200){
+
+		quiz = JSON.parse(xhr.responseText);
+		console.log(quiz);
+
+	}
+}
 
 content.innerHTML = "<p>Welcome to my Literature Quiz! Please enter your name below to begin</p>";
 content.innerHTML += "Name:<br>" +"<input type='text' id = 'fName' name='userid'><br>'";
@@ -199,6 +208,7 @@ var lastOne = document.getElementById("submit");
 lastOne.addEventListener('click', end, false);
 
 
-
+xhr.open('GET','/quiz', true);
+xhr.send(null);
 
 
