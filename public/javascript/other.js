@@ -14,19 +14,54 @@ var i =0;
 var correct = 0;
 var incorrect = 0;
 var first = true;
+var last = false;
 var nameString;
 var checkedVal = {};
 var colors = ["Green", "Red"];
 var lastCalled = false;
+var quiz;
 
-xhr.onload = function(){
+	$.ajax({
+		beforeSend: function(xhr){
+			if(xhr.overrideMimeType){
+				xhr.overrideMimeType("my-quiz/json");
+			}
+		}
+	});
+
+function loadQuiz(){
+    console.log('loadQuiz called');
+
+	$.getJSON('/quiz')
+	.done(function(data){
+
+     quiz=data;
+     if(last===false){
+     nextQuestion();
+ }
+	})//.done
+	.fail(function(){
+		$('.content').append("Sorry we cannot load the page");
+	})//fail
+	.always(function(){
+     //$('.content').append("always was called");
+	})
+	
+/*	$.ajax({
+  dataType: "json",
+  url: '/quiz',
+  data: data
+});
+*/
+}//load quiz
+
+/*xhr.onload = function(){
 	if(xhr.status===200){
-
-		quiz = JSON.parse(xhr.responseText);
+		quiz = JSON.parse(xhr.responseText); ///p g397-399
 		console.log(quiz);
 
 	}
-}
+}*/
 
 content.innerHTML = "<p>Welcome to my Literature Quiz! Please enter your name below to begin</p>";
 content.innerHTML += "Name:<br>" +"<input type='text' id = 'fName' name='userid'><br>'";
@@ -40,12 +75,21 @@ $( ".submit" ).hide();
   
 
 function nextQuestion(){
+images.innerHTML = "";
+console.log("i=" + i);	
 $( "#content" ).hide();	
 $( "#content" ).fadeIn( "slow");
 if(i===0 || atLeastOneRadio()==true){	
 	if(lastCalled===false){
 checkedVal[i-1] = $("#radios input[type='radio']:checked").val();////PROBLEM!!!!
 }
+/////////new
+if(i===quiz.questions.length){
+	last  = true;
+    end();
+}
+if(last===false){
+/////////////////////////////
 $( ".toLastQuestion" ).hide();
 $( ".submit" ).hide();
 if(i>=1){
@@ -70,7 +114,7 @@ if(i>=1){
 	///////////////////////////////////////////////////////////////////////////////
 																					//questions
 	 if(i<quiz.questions.length){
-
+//Object.keys(quiz).length quiz.questions.length
 	 content.innerHTML += "<p>" + quiz.questions[i].texts + "</p>";
 
  
@@ -88,6 +132,20 @@ if(i>=1){
 	 }
 
 	  }//answer buttons
+///////////////////////////////////////////////////////////////////////////////////////////////////////load picture
+	  $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
+  {
+    tags: String(quiz.questions[i].meta_tags),
+    tagmode: "any",
+    format: "json"
+  },
+  function(data) {
+    $.each(data.items, function(l,item){
+      $("<img />").attr("src", item.media.m).appendTo("#images");
+      if ( l == 0 ) return false;
+    });
+  });
+/////////////////////////////////////////////////////////////////////////////////////////////	  
 	for(k=0;k<quiz.questions.length; k++){
 		console.log(checkedVal[k]);
 	}
@@ -111,10 +169,11 @@ if(i>=1){
 else{
 	alert("Please select an answer before moving forward");
 }
-
+}///new
 }//nextquestion
 
 function lastQuestion(){
+
 	lastCalled = true;
 	if(atLeastOneRadio()===true){
 	i-=2;
@@ -130,17 +189,23 @@ function atLeastOneRadio() {
 }
 
 function end(){
+checkedVal[i-1] = $("#radios input[type='radio']:checked").val();
+last=true;
 $( ".toNextQuestion" ).hide();
 $( ".toLastQuestion" ).hide();
 $( ".submit" ).hide();	
 	for(i=0; i<quiz.questions.length; i++){
-		if(checkedVal[i]==quiz.questions[i].answers[quiz.questions[i].correctAnswer]){
+		if(checkedVal[i]==quiz.questions[i].answers[quiz.questions[i].correct_answer]){
 			correct++;
+			quiz.questions[i].global_correct++;
 		}
 		else{
 			incorrect++;
 		}
+		quiz.questions[i].global_total++;
+
 	}
+
 	content.innerHTML = "Congratualtions, " + nameString + "!. You've finnished the quiz."
 	$( ".content" ).append("<p><b>Your Score:</b></p>");
 	$( ".content" ).append("Percentage:" + correct/(quiz.questions.length)*100 +"%<br>");
@@ -155,14 +220,43 @@ $( ".submit" ).hide();
 
     drawSegment(c,ctx,0);
     drawSegment(c,ctx,1);
+    loadQuiz();
 
      $( ".content" ).append("<p>Here are the answers to the questions you missed:</p>");
     for(k=0; k<quiz.questions.length;k++){
-    	if(checkedVal[k]!=quiz.questions[k].answers[quiz.questions[k].correctAnswer]){
+    	if(checkedVal[k]!=quiz.questions[k].answers[quiz.questions[k].correct_answer]){
     		$( ".content" ).append("<p><b>" + quiz.questions[k].texts + "</b></p>");
-    		$( ".content" ).append("<p>" + quiz.questions[k].answers[quiz.questions[k].correctAnswer] + "</p>");
+    		$( ".content" ).append("<p>" + quiz.questions[k].answers[quiz.questions[k].correct_answer] + "</p>");
     	}
     }
+
+	$( ".content" ).append("<p>See how you did compared to others:</p>");
+	$( ".content" ).append('<table style="width:100%">');
+	$( ".content" ).append(' <tr><th>Question</th><th>Your Answer</th><th>Average Correct</th></tr>');
+    for(k=0; k<quiz.questions.length;k++){
+		  //$( ".content" ).append("<td></td>");
+		  //
+		   $( ".content" ).append("<tr><td>"+ quiz.questions[k].texts+ "</td>");
+		   if(checkedVal[k]===quiz.questions[k].answers[quiz.questions[k].correct_answer]){
+          	$( ".content" ).append("<td>Correct</td>");
+          }
+          else{
+          	$( ".content" ).append("<td>Wrong</td>");
+          }
+    	  $( ".content" ).append("<td>" + Math.floor((quiz.questions[k].global_correct/quiz.questions[k].global_total)*100, -2) + "% correct</td></tr>");
+
+    }
+   $( ".content" ).append('</table>');
+    var globalQuiz = String(quiz);
+    console.log(globalQuiz);
+
+
+
+    $.ajax({
+        url: '/quiz',
+        type: 'POST',
+        data: quiz
+    });
 }
 
 function drawSegment(canvas, context, i) {
@@ -199,16 +293,17 @@ function sumTo(a, i) {
     return sum;
 }
 var el = document.getElementById("toNextQuestion");
-el.addEventListener('click', nextQuestion, false);
+el.addEventListener('click', loadQuiz, false);
 
 var back = document.getElementById("toLastQuestion");
 back.addEventListener('click', lastQuestion, false);
 
 var lastOne = document.getElementById("submit");
-lastOne.addEventListener('click', end, false);
+lastOne.addEventListener('click', nextQuestion, false);
 
 
-xhr.open('GET','/quiz', true);
-xhr.send(null);
+
+//xhr.open('GET','javascript/quiz', true);
+//xhr.send(null);
 
 
