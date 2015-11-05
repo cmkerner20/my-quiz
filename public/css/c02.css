@@ -1,0 +1,9 @@
+ body {
+        width: 600px;
+        margin: 5em auto;
+        padding: 50px;
+        background-color: #fff;
+        border-radius: 1em;
+        font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        
+    }

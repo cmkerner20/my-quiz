@@ -1,0 +1,24 @@
+{
+  "name": "my-quiz",
+  "version": "1.0.0",
+  "description": "This is my fire quiz built with - node.js - express - html css js",
+  "main": "jquery-1.11.1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmkerner20/my-quiz.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cmkerner20/my-quiz/issues"
+  },
+  "homepage": "https://github.com/cmkerner20/my-quiz#readme",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "fs": "0.0.2"
+  }
+}
