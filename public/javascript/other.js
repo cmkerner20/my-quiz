@@ -133,7 +133,7 @@ if(i>=1){
 
 	  }//answer buttons
 ///////////////////////////////////////////////////////////////////////////////////////////////////////load picture
-	  $.getJSON("http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
+	  $.getJSON("https://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?",
   {
     tags: String(quiz.questions[i].meta_tags),
     tagmode: "any",
