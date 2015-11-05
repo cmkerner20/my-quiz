@@ -73,4 +73,4 @@ app.post('/quiz', function(req, res) {
 
   console.log('Example app listening at http://%s:%s', host, port);
 });*/
-app.listen(4000);
+app.listen(process.env.PORT || 4000);
